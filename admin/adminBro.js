@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const express = require("express");
 const { User, Admin } = require("../models/userModel");
+const session = require("express-session");
 
 const app = express();
 
@@ -16,15 +17,26 @@ const adminBro = new AdminBro({
   resources: [
     {
       resource: User,
+    },
+    {
       resource: Admin,
     },
   ],
   branding: {
-    companyName: "<NAME>",
+    companyName: "CURD",
     logo: "https://i.ibb.co/205678y/logo192x192.png",
     softwareBrothers: false,
   },
 });
+
+// Set up session
+app.use(
+  session({
+    secret: "your-secret-key",
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 
 const ADMIN = {
   email: process.env.ADMIN_EMAIL || "kameshjeeva30@gmail.com",
@@ -34,14 +46,14 @@ const ADMIN = {
 const router = AdminBroExpress.buildAuthenticatedRouter(adminBro, {
   cookieName: process.env.ADMIN_COOKIE_NAME || "adminbro",
   cookiePassword: process.env.ADMIN_COOKIE_PASS || "supersecret",
-  auth: {
-    authenticate: async (email, password) => {
-      if (email === ADMIN.email && password === ADMIN.password) {
-        return ADMIN;
-      }
-    },
-    cookiePassword: "your-secret-cookie-password",
+
+  authenticate: async (email, password) => {
+    if (email === ADMIN.email && password === ADMIN.password) {
+      return ADMIN;
+    }
+    return null;
   },
+  cookiePassword: "your-secret-cookie-password",
 });
 app.use(adminBro.options.rootPath, router);
 
