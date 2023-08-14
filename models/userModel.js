@@ -18,7 +18,6 @@ const userSchema = new Schema({
   },
   password: {
     type: String,
-    minlength: 6,
   },
   timezone: {
     type: String,
@@ -40,6 +39,31 @@ const AdminSchema = new Schema({
     type: String,
     required: [true, "Email is required"],
   },
+});
+
+/*
+userSchema.pre("save", async function (next) {
+  let doc = this;
+  if (doc.isNew) {
+    const lastUser = await User.findOneAndUpdate(
+      { $inc: { UserID: 1 } },
+      { new: true, upsert: true },
+      { sort: { userID: -1 } }
+    );
+    const newUserId = (lastUser && lastUser.userId) || 0;
+    doc.UserID = newUserId + 1;
+  }
+  next();
+});
+*/
+
+userSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const lastUser = await User.findOne({}, {}, { sort: { userID: -1 } });
+    const newUserId = (lastUser && lastUser.userID) || 0;
+    this.userID = newUserId + 1;
+  }
+  next();
 });
 
 const User = mongoose.model("User", userSchema);
