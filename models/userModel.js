@@ -3,7 +3,11 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
-  name: {
+  UserID: {
+    type: Number,
+    unique: true,
+  },
+  username: {
     type: String,
     required: [true, "Username is Required"],
     trim: true,
@@ -15,6 +19,14 @@ const userSchema = new Schema({
   password: {
     type: String,
     minlength: 6,
+  },
+  timezone: {
+    type: String,
+    default: "UTC",
+  },
+  lastSignInAt: {
+    type: Date,
+    default: null, // Set to null initially
   },
 });
 

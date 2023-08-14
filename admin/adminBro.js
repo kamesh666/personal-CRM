@@ -11,6 +11,8 @@ const app = express();
 
 AdminBro.registerAdapter(AdminBroMongoose);
 
+app.use(bodyParser.json());
+
 const adminBro = new AdminBro({
   databases: [mongoose],
   rootPath: "/admin",
@@ -23,7 +25,7 @@ const adminBro = new AdminBro({
     },
   ],
   branding: {
-    companyName: "CURD",
+    companyName: "personal CRM",
     logo: "https://i.ibb.co/205678y/logo192x192.png",
     softwareBrothers: false,
   },
@@ -33,7 +35,6 @@ const adminBro = new AdminBro({
 app.use(
   session({
     secret: "your-secret-key",
-    resave: false,
     saveUninitialized: false,
   })
 );
@@ -43,7 +44,7 @@ const ADMIN = {
   password: process.env.ADMIN_PASS || "password",
 };
 
-const router = AdminBroExpress.buildAuthenticatedRouter(adminBro, {
+const adminRouter = AdminBroExpress.buildAuthenticatedRouter(adminBro, {
   cookieName: process.env.ADMIN_COOKIE_NAME || "adminbro",
   cookiePassword: process.env.ADMIN_COOKIE_PASS || "supersecret",
 
@@ -53,12 +54,10 @@ const router = AdminBroExpress.buildAuthenticatedRouter(adminBro, {
     }
     return null;
   },
-  cookiePassword: "your-secret-cookie-password",
+  // cookiePassword: "your-secret-cookie-password",
 });
-app.use(adminBro.options.rootPath, router);
-
-app.use(bodyParser.json());
+app.use(adminBro.options.rootPath, adminRouter);
 
 // const adminRouter = AdminBroExpress.buildAuthenticatedRouter(adminBro);
 
-module.exports = { router };
+module.exports = { adminRouter };
